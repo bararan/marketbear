@@ -49,10 +49,10 @@ module.exports = function(app, db, io) {
     })
 
     io.on("connection", (socket) => {
-        console.log("User connected to MarketBear");
+        console.log("User " + socket.id + " connected to MarketBear");
 
         // Upon first connection emit all the stocks
-        io.emit("initial setup", stocks);
+        io.to(socket.id).emit("initial setup", stocks);
 
         // Wrappers for emitters to be used as callbacks
         const emitOnAdd = function(stock) {
@@ -68,9 +68,9 @@ module.exports = function(app, db, io) {
         }
 
         // Event handlers
-        socket.on("add ticker", function(ticker) {
+        socket.on("add ticker", (ticker) => {
             console.log("NEW TICKER RECEIVED: " + ticker)
-            addStock(ticker, emitOnAdd);
+            addStock(ticker, emitOnAdd, emitOnError);
         });
         socket.on("remove ticker", (ticker) => {
             removeStock(ticker, emitOnRemove);
