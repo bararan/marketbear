@@ -61,7 +61,7 @@ module.exports = function(app, db, io) {
         }
         const emitOnRemove = function(ticker) {
             console.log("Removing " + ticker)
-            io.emit("remove stock", ticker)
+            socket.broadcast.emit("remove stock", ticker)
         }
         const emitOnError = function(error) {
             io.emit("error", error)
