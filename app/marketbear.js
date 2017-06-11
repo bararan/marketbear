@@ -1,15 +1,29 @@
 "use strict";
 const https = require("https");
+let today = new Date();
+let startDate = new Date(today - 365 * 24 * 60 * 60 * 1000);
 
 module.exports = function(app, db, io) {
     let stocks = [];
     const queryBase = "https://www.quandl.com/api/v3/datasets/WIKI/";
+
+    const checkDate = function() {
+        const newDate = new Date();
+        if (newDate.getDate() !== today.getDate()) {
+            today = newDate();
+            startDate = new Date(today - 365 * 24 * 60 * 60 * 1000);
+            return true
+        }
+        return false;
+    }
                        
     const addStock = function(ticker, callback, errcallback) {
         if (stocks.findIndex((stock) => {return stock.symbol === ticker}) >= 0) {
             return console.log("Stock " + ticker + " already there");
         }
-        const query = queryBase + ticker + ".json?column_index=4&api_key=" + process.env.QUANDL_APIKEY;
+        const query = queryBase 
+                        + ticker + ".json?start_date=" + startDate
+                        + "&column_index=4&api_key=" + process.env.QUANDL_APIKEY;
         https.get(query, (response) => {
             if (response.statusCode == 200) {
                 let body = "";
@@ -20,7 +34,9 @@ module.exports = function(app, db, io) {
                     const jsonData = JSON.parse(body).dataset;
                     let name = jsonData.name;
                     const priceHistory = jsonData.data.map((dataPoint) => {
-                        return {date: dataPoint[0], price: parseFloat(dataPoint[1])}
+                        const dateArray = dataPoint[0].split("-");
+                        const date = new Date(parseInt(dateArray[0]), parseInt(dateArray[1]), parseInt(dateArray[2]));
+                        return {date: date, price: parseFloat(dataPoint[1])}
                     })
                     const newStock = {
                         symbol: ticker,
@@ -40,8 +56,14 @@ module.exports = function(app, db, io) {
     const removeStock = function(ticker, callback) {
         callback(ticker);
         stocks = stocks.filter((stock) => {return stock.symbol !== ticker});
-        // const ind = stocks.findIndex((stock) => {return stock.symbol === ticker});
-        // stocks.splice(ind, 1);
+    }
+
+    // TODO: This function is not complete yet and is not called anywhere.
+    const refreshAll = function(newTicker) {
+        // Need to refresh data on all stocks in memory (plus the newly requested one if it's not there)
+        let tickers = stocks.map((stock)=>{return stock.symbol});
+        tickers.push(newTicker); //Add the new ticker. If it's already in memory the query won't run anyway.
+        // TODO: Need to update stock data here!
     }
 
     app.get("/", (req, res) => {
@@ -51,7 +73,7 @@ module.exports = function(app, db, io) {
     io.on("connection", (socket) => {
         console.log("User " + socket.id + " connected to MarketBear");
 
-        // Upon first connection emit all the stocks
+        // Upon first connection emit all the stocks to the newly connected client!
         io.to(socket.id).emit("initial setup", stocks);
 
         // Wrappers for emitters to be used as callbacks
@@ -70,6 +92,11 @@ module.exports = function(app, db, io) {
         // Event handlers
         socket.on("add ticker", (ticker) => {
             console.log("NEW TICKER RECEIVED: " + ticker)
+            // TODO: uncomment the following after completing refreshAll()
+            // if (checkDate()){
+            //     refreshAll(ticker);
+            //     return;
+            // }
             addStock(ticker, emitOnAdd, emitOnError);
         });
         socket.on("remove ticker", (ticker) => {
