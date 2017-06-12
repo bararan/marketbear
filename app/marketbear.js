@@ -1,7 +1,8 @@
 "use strict";
 const https = require("https");
 let today = new Date();
-let startDate = new Date(today - 365 * 24 * 60 * 60 * 1000);
+let oneYearAgo = new Date(today - 365 * 24 * 60 * 60 * 1000);
+let startDate = oneYearAgo.toISOString().slice(0, 10)
 
 module.exports = function(app, db, io) {
     let stocks = [];
@@ -10,8 +11,9 @@ module.exports = function(app, db, io) {
     const checkDate = function() {
         const newDate = new Date();
         if (newDate.getDate() !== today.getDate()) {
-            today = newDate();
-            startDate = new Date(today - 365 * 24 * 60 * 60 * 1000);
+            today = new Date();
+            oneYearAgo = new Date(today - 365 * 24 * 60 * 60 * 1000);
+            startDate = oneYearAgo.toISOString().slice(0, 10)
             return true
         }
         return false;
@@ -34,9 +36,7 @@ module.exports = function(app, db, io) {
                     const jsonData = JSON.parse(body).dataset;
                     let name = jsonData.name;
                     const priceHistory = jsonData.data.map((dataPoint) => {
-                        const dateArray = dataPoint[0].split("-");
-                        const date = new Date(parseInt(dateArray[0]), parseInt(dateArray[1]), parseInt(dateArray[2]));
-                        return {date: date, price: parseFloat(dataPoint[1])}
+                        return {date: dataPoint[0], price: dataPoint[1]}
                     })
                     const newStock = {
                         symbol: ticker,

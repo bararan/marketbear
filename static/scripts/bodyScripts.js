@@ -33,7 +33,6 @@ socket.on("add stock", (newStock) => {
         addNewStock(newStock);
         return;
     }
-    console.log("HOLA@")
 })
 
 socket.on("remove stock", (ticker) => {
@@ -43,14 +42,14 @@ socket.on("remove stock", (ticker) => {
 // Functions to modify page content 
 const addNewStock = function(stock) {
     stocks.push(stock);
-    plotStocks();
     let newButton = document.createElement("button");
     newButton.id = stock.symbol;
-    newButton.className = "btn btn-default";
+    newButton.className = "btn";
     newButton.value = stock.symbol;
     newButton.innerText = stock.name;
     newButton.onclick = ()=>{emitRemove(stock.symbol);}
     document.getElementById("stocks").appendChild(newButton);
+    plotStocks();
 }
 
 const removeStock = function(ticker) {
@@ -65,6 +64,7 @@ const removeStock = function(ticker) {
 const plotStocks = function() {
     let graph = document.getElementById("graph");
     if (graph) {graph.remove();}
+    if (stocks.length === 0) return;
     const margin = {top: 20, right: 20, bottom: 30, left: 50};
     const canvasWidth = document.getElementById("graph-container").offsetWidth - margin.left - margin.right;
     const canvasHeight = document.getElementById("graph-container").offsetHeight - margin.top - margin.bottom;
@@ -76,7 +76,7 @@ const plotStocks = function() {
                                         .attr("height", "100%");
     const dateExtent = d3.extent(stocks[0].priceHistory.map((d)=>{return parseTime(d.date.slice(0,10));}));
     let xScale = d3.scaleTime().domain(dateExtent).range([0, canvasWidth]);
-    let xAxis = d3.axisBottom(xScale).tickFormat(d3.timeFormat("%b %Y"));
+    let xAxis = d3.axisBottom(xScale).tickFormat(d3.timeFormat("%b '%y"));
     let priceExtent = d3.extent(
         stocks.reduce((prices, stock)=> {
             return prices.concat(stock.priceHistory.map((ph)=>{return ph.price}));
@@ -84,25 +84,28 @@ const plotStocks = function() {
     );
     let yScale = d3.scaleLinear().domain(priceExtent).range([canvasHeight, 0]);
     let yAxis = d3.axisLeft(yScale).ticks(5);
-
+    
     stocks.forEach((stock, ind) => {
-        let graphGroup = d3.select("svg").append("g").attr("class", "price-plot")   
+        let graphGroup = d3.select("svg").append("g").attr("class", "price-plot") 
+                                                    .attr("id", "plot-group")  
                                                     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
         let plotLine = d3.line()
                             .x((d)=>{return xScale(parseTime(d.date.slice(0,10)))})
                             .y((d)=>{return yScale(d.price)});
 
+        const colour = rainbow(ind);                            
+
         graphGroup.selectAll(".price-line")
-                    .attr("id", stock.symbol)
+                    .attr("id", "price-" + stock.symbol)
                     .data([stock.priceHistory]) // Somehow it doesn't work without the brackets!
                     .enter().append("path")
                         .attr("class", "price-line")
                         .attr("d", plotLine)
-                        .attr("stroke",()=>{return rainbow(ind);});
+                        .attr("stroke",colour); //()=>{return rainbow(ind);});
                 
         graphGroup.append("g").attr("transform", "translate(0," + canvasHeight + ")").call(xAxis);
-        graphGroup.append("g").call(yAxis);    
+        graphGroup.append("g").call(yAxis);  
+        d3.select("#" + stock.symbol).style("background", colour)  
     })     
 }
 

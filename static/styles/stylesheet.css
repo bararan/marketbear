@@ -18,6 +18,10 @@ body {
 
 }*/
 
+.btn {
+    border: none;
+}
+
 .hidden {
     display: none;
 }
