@@ -39,16 +39,41 @@ socket.on("remove stock", (ticker) => {
     removeStock(ticker);
 })
 
+socket.on("error", (err) => {
+    alert(err);
+})
+
 // Functions to modify page content 
 const addNewStock = function(stock) {
     stocks.push(stock);
-    let newButton = document.createElement("button");
-    newButton.id = stock.symbol;
-    newButton.className = "btn";
-    newButton.value = stock.symbol;
-    newButton.innerText = stock.name;
-    newButton.onclick = ()=>{emitRemove(stock.symbol);}
-    document.getElementById("stocks").appendChild(newButton);
+    let newInfoCard = document.createElement("div");
+    newInfoCard.id = stock.symbol;
+    newInfoCard.className = "info-card";
+
+    let removeBtn = document.createElement("button");
+    removeBtn.className = "btn btn-remove";
+    removeBtn.id = "remove-" + stock.symbol;
+    let newSpan = document.createElement("span");
+    newSpan.setAttribute("class", "glyphicon glyphicon-remove");
+    removeBtn.appendChild(newSpan);
+    removeBtn.onclick = ()=>{emitRemove(stock.symbol);};
+    newInfoCard.appendChild(removeBtn);
+
+    let textContainer = document.createElement("div");
+    textContainer.className = "text-container"
+
+    let newCardText = document.createElement("h3");
+    newCardText.id = "text-" + stock.symbol;
+    newCardText.innerText = stock.symbol.toUpperCase();
+    let hiddenText = document.createElement("h6");
+    hiddenText.id = "hidden-" + stock.symbol;
+    hiddenText.className = "hidden";
+    hiddenText.innerText = stock.name;
+
+    textContainer.appendChild(newCardText);
+    textContainer.appendChild(hiddenText);
+    newInfoCard.appendChild(textContainer);
+    document.getElementById("stocks").appendChild(newInfoCard);
     plotStocks();
 }
 
@@ -160,7 +185,7 @@ const plotStocks = function() {
                                     d3.select("#date-info").classed("hidden", false);
                                     d3.selectAll(".highlight-circle").classed("hidden", false);
                                     d3.selectAll(".highlight-text").classed("hidden", false);
-                                    d3.selectAll(".price-line").attr("opacity", 0.6);
+                                    d3.selectAll(".price-line").attr("opacity", 0.5);
                                 })
                                 .on("mousemove", function() {
                                     const coords = d3.mouse(this);
@@ -189,14 +214,25 @@ const plotStocks = function() {
                                             d3.select("#date-info").text(date);
                                             d3.select("#circle-" + stock.symbol).attr("cy", yCoord);
                                             d3.select("#info-" + stock.symbol).attr("y", yCoord);
-                                            d3.select("#info-" + stock.symbol).text(stock.symbol.toUpperCase() + ": $" + stock.priceHistory[ind].price.toFixed(3))
+                                            d3.select("#info-" + stock.symbol).text(stock.symbol.toUpperCase() 
+                                                                                    + ": $" 
+                                                                                    + stock.priceHistory[ind].price.toFixed(2))
                                         }
                                     })
                                 });
                                 
     stocks.forEach((stock, i) => {
-        d3.select("#" + stock.symbol).style("border", "2px solid " + rainbow(i));
-        d3.select("#" + stock.symbol).on("mouseover", () => {d3.select("#price-" + stock.symbol).classed("highlighted", true);})
-        d3.select("#" + stock.symbol).on("mouseout", () => {d3.select("#price-" + stock.symbol).classed("highlighted", false);})
+        const colour = rainbow(i);
+        d3.select("#" + stock.symbol).style("border-bottom", "4px solid " + colour);
+        d3.select("#" + stock.symbol).on("mouseover", () => {
+            d3.select("#price-" + stock.symbol).classed("highlighted", true);
+            d3.select("#text-" + stock.symbol).classed("hidden", true);
+            d3.select("#hidden-" + stock.symbol).classed("hidden", false);
+        })
+        d3.select("#" + stock.symbol).on("mouseout", () => {
+            d3.select("#price-" + stock.symbol).classed("highlighted", false);
+            d3.select("#text-" + stock.symbol).classed("hidden", false);
+            d3.select("#hidden-" + stock.symbol).classed("hidden", true);
+        })
     })
 }

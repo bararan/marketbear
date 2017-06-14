@@ -1,8 +1,69 @@
 body {
+    color: slategrey;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+}
+
+/*#search {
+    width: 50%;
+    top: 20px;
+    left: 25%;
+    margin-bottom: 20px;
+    position: fixed;
+    display: block;
+}*/
+
+#search-box {
+    border-bottom: 4px solid slategrey;
+    padding: 0px;
+}
+
+#search-box button {
+    border: none;
+    background: none;
+}
+
+#search-box span {
+    color: slategrey;
+}
+
+#instructions {
+    font-size: 16px;
+    margin: 0px;
+}
+
+form {
+    width: 100%;
+}
+
+.form-control {
+    text-transform: uppercase;
+    font-size: 30px;
+    border: none;
+    color: slategrey;
+}
+
+.form-control::placeholder {
+    color: slategrey;
+}
+
+
+.form-control:focus {
+    box-shadow: none;
+}
+
+/*#results {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}*/
+
+.price-line {
+    stroke-width: 2px;
+    fill: none;
 }
 
 #graph-container {
@@ -15,16 +76,52 @@ body {
     width: 960px;
     display: flex;
     flex-wrap: wrap;
+    justify-content: flex-start;
+}
+
+.info-card {
+    width: 18%;
+    height: 64px;
+    margin-left: 1%;
+    margin-right: 1%;
+    display: flex;
+    flex-direction: column;
+    padding: none;
+}
+
+.text-container {
+    margin: none;
+    padding: none;
+    height: 36px;
+    width: 100%;
     justify-content: center;
+    display: flex;
 }
 
-#search {
-    width: 50%;
+h3 {
+    font-size: 36px;
+    margin: 0px;
 }
 
-.price-line {
-    stroke-width: 2px;
-    fill: none;
+h6 {
+    font-size: 18px;
+    margin: 0px;
+    text-align: center;
+    align-self: flex-end;
+}
+
+.btn-remove {
+    background: none;
+    padding: none;
+    text-align: right;
+    display: block;
+    height: 24px;
+    width:100%;
+}
+
+span {
+    height: 100%;
+    padding: 0; 
 }
 
 .highlighted {
@@ -39,10 +136,6 @@ body {
     text-align: center;
     background: lightgray;
     border-left: 5px solid;
-}*/
-
-/*.btn {
-    border: none;
 }*/
 
 .hidden {

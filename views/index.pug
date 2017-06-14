@@ -20,12 +20,16 @@ html
             rel="stylesheet"
         )
     body
+        //- div(id="results" class="container-fluid")
         div(id="graph-container" class="container-fluid")
         div(id="stocks" class="container-fluid")
-        div(id="search" class="container-fluid")
-            form(id="ticker-search" class="input-group" onsubmit="emitTicker(this.ticker.value);return false;")
-                input(type="text" class="form-control" name="ticker" placeholder="Search for a new ticker" autofocus)
-                span(class="input-group-btn")
-                    input(type="submit" class="btn btn-default" value="GO!" formaction="")   
+            div(id="search-box" class="info-card")
+                div(id="instructions" class="container-fluid") SEARCH 
+                    a(href="http://eoddata.com/symbols.aspx" target="_blank") TICKER
+                form(id="search-ticker" class="input-group" onsubmit="emitTicker(this.ticker.value);return false;")
+                    input(type="text" class="form-control" name="ticker" placeholder="E.g: FB" autofocus)
+                    span(class="input-group-btn")
+                        button(type="submit" class="btn btn-default" value="" formaction="")
+                            span(class="glyphicon glyphicon-search")
 
         script(src="../scripts/bodyScripts.js")

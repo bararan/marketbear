@@ -21,7 +21,7 @@ module.exports = function(app, db, io) {
                        
     const addStock = function(ticker, callback, errcallback) {
         if (stocks.findIndex((stock) => {return stock.symbol === ticker}) >= 0) {
-            return console.log("Stock " + ticker + " already there");
+            return errcallback("Stock " + ticker + " already there");
         }
         const query = queryBase 
                         + ticker + ".json?start_date=" + startDate
@@ -48,7 +48,7 @@ module.exports = function(app, db, io) {
                     })
             } else {
                 console.log(response.statusCode + ": " + response.statusMessage)
-                errcallback("Unable to find the ticker!")
+                errcallback("Unable to find ticker " + ticker.toUpperCase() + "!")
             }
         })
     }
@@ -86,7 +86,7 @@ module.exports = function(app, db, io) {
         }
         const emitOnError = function(error) {
             // TODO: find a way to emit error only to the socket that submitted the query
-            io.emit("error", error)
+            io.to(socket.id).emit("error", error)
         }
 
         // Event handlers
