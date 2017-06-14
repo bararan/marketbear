@@ -122,8 +122,9 @@ const plotStocks = function() {
     let graphGroup = d3.select("svg").append("g").attr("class", "price-plot") 
                                                 .attr("id", "plot-group")  
                                                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-    graphGroup.append("g").attr("transform", "translate(0," + canvasHeight + ")").call(xAxis);
-    graphGroup.append("g").call(yAxis);                        
+
+    graphGroup.append("g").attr("class", "axis axisDisplay").attr("transform", "translate(0," + canvasHeight + ")").call(xAxis);
+    graphGroup.append("g").attr("class", "axis").call(yAxis);                        
 
     graphGroup.append("g").selectAll(".price-line")
                 .data(stocks)
@@ -156,14 +157,14 @@ const plotStocks = function() {
                                 .classed("hidden", true);
 
     graphGroup.append("text").attr("id", "date-info")
-                             .attr("fill", "black")
+                             .attr("fill", "slategrey")
                              .attr("font-weight", "bold")
                              .classed("hidden", true)                                
 
     graphGroup.append("path")
                     .attr("class", "tooltip-line")
                     .attr("stroke-width", "1px")
-                    .attr("stroke", "black")
+                    .attr("stroke", "slategrey")
                     .classed("hidden", true);
 
     let tooltipContainer = graphGroup.append("rect")
@@ -185,7 +186,7 @@ const plotStocks = function() {
                                     d3.select("#date-info").classed("hidden", false);
                                     d3.selectAll(".highlight-circle").classed("hidden", false);
                                     d3.selectAll(".highlight-text").classed("hidden", false);
-                                    d3.selectAll(".price-line").attr("opacity", 0.5);
+                                    d3.selectAll(".price-line").attr("opacity", 0.6);
                                 })
                                 .on("mousemove", function() {
                                     const coords = d3.mouse(this);
@@ -217,6 +218,8 @@ const plotStocks = function() {
                                             d3.select("#info-" + stock.symbol).text(stock.symbol.toUpperCase() 
                                                                                     + ": $" 
                                                                                     + stock.priceHistory[ind].price.toFixed(2))
+                                        } else { // For some stocks data aren't avaliable for all dates!
+                                            d3.select("#info-" + stock.symbol).text("");
                                         }
                                     })
                                 });
