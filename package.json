@@ -20,7 +20,6 @@
     "body-parser": "1.17.2",
     "dotenv": "4.0.0",
     "express": "4.15.3",
-    "mongodb": "2.2.28",
     "morgan": "1.8.2",
     "path": "0.12.7",
     "pug": "2.0.0-rc.2",
