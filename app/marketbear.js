@@ -4,7 +4,7 @@ let today = new Date();
 let oneYearAgo = new Date(today - 365 * 24 * 60 * 60 * 1000);
 let startDate = oneYearAgo.toISOString().slice(0, 10)
 
-module.exports = function(app, db, io) {
+module.exports = function(app, io) { //function(app, db, io) {
     let stocks = [];
     const queryBase = "https://www.quandl.com/api/v3/datasets/WIKI/";
 
@@ -21,7 +21,7 @@ module.exports = function(app, db, io) {
                        
     const addStock = function(ticker, callback, errcallback) {
         if (stocks.findIndex((stock) => {return stock.symbol === ticker}) >= 0) {
-            return errcallback("Stock " + ticker + " already there");
+            return errcallback("Stock " + ticker.toUpperCase() + " already there");
         }
         const query = queryBase 
                         + ticker + ".json?start_date=" + startDate
@@ -35,6 +35,9 @@ module.exports = function(app, db, io) {
                 response.on("end", () => {
                     const jsonData = JSON.parse(body).dataset;
                     let name = jsonData.name;
+                    if (jsonData.newest_available_date < startDate) {
+                        return errcallback("Data for " + ticker + " available up to " + jsonData.newest_available_date + "!");
+                    }
                     const priceHistory = jsonData.data.map((dataPoint) => {
                         return {date: dataPoint[0], price: dataPoint[1]}
                     })
