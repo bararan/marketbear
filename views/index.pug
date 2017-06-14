@@ -22,7 +22,10 @@ html
     body
         div(id="graph-container" class="container-fluid")
         div(id="stocks" class="container-fluid")
-        form(id="ticker-search" onsubmit="emitTicker(this.ticker.value);return false;")
-            input(type="form-control" name="ticker")
-            input(type="submit" class="btn" value="GO!" formaction="")
+        div(id="search" class="container-fluid")
+            form(id="ticker-search" class="input-group" onsubmit="emitTicker(this.ticker.value);return false;")
+                input(type="text" class="form-control" name="ticker" placeholder="Search for a new ticker" autofocus)
+                span(class="input-group-btn")
+                    input(type="submit" class="btn btn-default" value="GO!" formaction="")   
+
         script(src="../scripts/bodyScripts.js")

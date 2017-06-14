@@ -82,10 +82,10 @@ module.exports = function(app, db, io) {
             io.emit("add stock", stock)
         }
         const emitOnRemove = function(ticker) {
-            console.log("Removing " + ticker)
             socket.broadcast.emit("remove stock", ticker)
         }
         const emitOnError = function(error) {
+            // TODO: find a way to emit error only to the socket that submitted the query
             io.emit("error", error)
         }
 

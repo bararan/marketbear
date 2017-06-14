@@ -48,8 +48,6 @@ const addNewStock = function(stock) {
     newButton.value = stock.symbol;
     newButton.innerText = stock.name;
     newButton.onclick = ()=>{emitRemove(stock.symbol);}
-    // newButton.onmouseover = () => {document.getElementById("price-" + stock.symbol).classList.add("highlighted");}
-    // newButton.onmouseout = () => {document.getElementById("price-" + stock.symbol).classList.remove("highlighted");}
     document.getElementById("stocks").appendChild(newButton);
     plotStocks();
 }
@@ -94,7 +92,8 @@ const plotStocks = function() {
 
     let plotLine = d3.line()
                         .x((d)=>{return xScale(parseTime(d.date.slice(0,10)))})
-                        .y((d)=>{return yScale(d.price)});
+                        .y((d)=>{return yScale(d.price)})
+                        .curve(d3.curveCatmullRom.alpha(0.5));
     let graphGroup = d3.select("svg").append("g").attr("class", "price-plot") 
                                                 .attr("id", "plot-group")  
                                                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
@@ -125,14 +124,17 @@ const plotStocks = function() {
                              .data(stocks.map((stock)=>{return stock.symbol;}))
                              .enter().append("text")
                                 .attr("class", "highlight-text")
-                                .attr("text-anchor", "start")
                                 .attr("id", (d)=>{return "info-" + d})
                                 .attr("fill", (d, i)=>{return rainbow(i)})
                                 .attr("font-weight", "bold")
                                 .text((d)=>{return d + ": "})
                                 .classed("hidden", true);
 
-    let tooltipGroup = graphGroup.append("g");
+    graphGroup.append("text").attr("id", "date-info")
+                             .attr("fill", "black")
+                             .attr("font-weight", "bold")
+                             .classed("hidden", true)                                
+
     graphGroup.append("path")
                     .attr("class", "tooltip-line")
                     .attr("stroke-width", "1px")
@@ -148,12 +150,14 @@ const plotStocks = function() {
                                 .attr("pointer-events", "all")
                                 .on("mouseout", ()=> {
                                     d3.select(".tooltip-line").classed("hidden", true);
+                                    d3.select("#date-info").classed("hidden", true);
                                     d3.selectAll(".highlight-circle").classed("hidden", true);
                                     d3.selectAll(".highlight-text").classed("hidden", true);
                                     d3.selectAll(".price-line").attr("opacity", 1.0);
                                 })
                                 .on("mouseover", () => {
                                     d3.select(".tooltip-line").classed("hidden", false);
+                                    d3.select("#date-info").classed("hidden", false);
                                     d3.selectAll(".highlight-circle").classed("hidden", false);
                                     d3.selectAll(".highlight-text").classed("hidden", false);
                                     d3.selectAll(".price-line").attr("opacity", 0.6);
@@ -164,18 +168,28 @@ const plotStocks = function() {
                                         .attr("d", () => {
                                             return "M" + coords[0] + "," + 0 + "L" + coords[0] + "," + (canvasHeight);
                                         })
+                                    d3.select("#date-info").attr("x", coords[0]);
+                                    if (coords[0] > canvasWidth - 100) {
+                                        d3.select("#date-info").attr("text-anchor", "end");
+                                        d3.selectAll(".highlight-text").attr("text-anchor", "end");
+                                        d3.selectAll(".highlight-text").attr("x", coords[0] - 10);
+                                    } else {
+                                        d3.select("#date-info").attr("text-anchor", "start");
+                                        d3.selectAll(".highlight-text").attr("text-anchor", "start");
+                                        d3.selectAll(".highlight-text").attr("x", coords[0] + 10);
+                                    }
                                     d3.selectAll(".highlight-circle").attr("cx", coords[0]);
-                                    d3.selectAll(".highlight-text").attr("x", coords[0] + 10);
                                     const date = xScale.invert(coords[0]).toISOString().slice(0,10);
                                     stocks.forEach((stock) => {
                                         const ind = stock.priceHistory.findIndex((dataPoint) => {
                                             return dataPoint.date.slice(0, 10) === date
                                         })
-                                        if (ind > -1) { // No price data for wekends & holidays!
+                                        if (ind > -1) { // No price data for wekends & holidays, so ignore them!
                                             const yCoord = yScale(stock.priceHistory[ind].price);
+                                            d3.select("#date-info").text(date);
                                             d3.select("#circle-" + stock.symbol).attr("cy", yCoord);
                                             d3.select("#info-" + stock.symbol).attr("y", yCoord);
-                                            d3.select("#info-" + stock.symbol).text(stock.symbol + ": $" + stock.priceHistory[ind].price.toFixed(3))
+                                            d3.select("#info-" + stock.symbol).text(stock.symbol.toUpperCase() + ": $" + stock.priceHistory[ind].price.toFixed(3))
                                         }
                                     })
                                 });
