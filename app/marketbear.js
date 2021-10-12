@@ -1,7 +1,7 @@
 "use strict";
 const https = require("https");
 let today = new Date();
-let oneYearAgo = new Date(today - 5 * 365 * 24 * 60 * 60 * 1000);
+let oneYearAgo = new Date(today - 365 * 24 * 60 * 60 * 1000);
 let startDate = oneYearAgo.toISOString().slice(0, 10)
 
 module.exports = function(app, io) { //function(app, db, io) {
@@ -12,7 +12,7 @@ module.exports = function(app, io) { //function(app, db, io) {
         const newDate = new Date();
         if (newDate.getDate() !== today.getDate()) {
             today = new Date();
-            oneYearAgo = new Date(today - 5 * 365 * 24 * 60 * 60 * 1000);
+            oneYearAgo = new Date(today - 365 * 24 * 60 * 60 * 1000);
             startDate = oneYearAgo.toISOString().slice(0, 10)
             return true
         }
